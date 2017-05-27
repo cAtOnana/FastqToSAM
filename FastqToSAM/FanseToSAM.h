@@ -3,6 +3,13 @@
 #include<string>
 using std::string;
 
-struct swiff {
-	string dataname;
+struct fanse {
+	int order;
+	string seq;
+	string mapping;
+	string strand;
+	string chr;
+	string position;
+	int site_num;
+	string pos[];
 };
