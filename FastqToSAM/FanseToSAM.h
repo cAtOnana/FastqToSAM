@@ -9,6 +9,7 @@ struct fanse {
 	string mapping;
 	string strand;
 	string chr;
+	int mism;
 	string position;
 	int site_num;
 	string pos[];

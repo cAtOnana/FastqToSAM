@@ -3,12 +3,7 @@
 #include<ctime>
 #include"FanseToSAM.h"
 #include<vector>
-using std::cout;
-using std::cin;
-using std::ifstream;
-using std::ofstream;
-using std::endl;
-using std::vector;
+using namespace std;
 int main(int argc,char*argv[]) {
 	string log = string(argv[1]);
 	log = log.erase(log.length() - 6) + "log";
@@ -22,11 +17,27 @@ int main(int argc,char*argv[]) {
 		outlog << argv[1] << "处理失败，原因：输入参数过多。" << endl;
 		exit(EXIT_FAILURE);
 	}
-	ifstream is(argv[1]);
-	if (!is.is_open()) {
+	ifstream ifan(argv[1]);
+	if (!ifan.is_open()) {
 		cout << "fanse文件打开失败，请查看输出路径以确认fanse文件在路径中，程序退出。";
 		outlog << argv[1] << "处理失败，原因：fanse文件打开失败，请查看输出路径以确认fanse文件在路径中。" << endl;
 		exit(EXIT_FAILURE);
 	}
 	vector<fanse> list;
+	int count = 0;
+	fanse temp;
+	while (ifan >> temp.order) {
+		ifan >> temp.seq;
+		ifan >> temp.mapping;
+		ifan >> temp.strand;
+		ifan >> temp.chr;
+		temp.chr.erase(temp.chr.find(','));//本次处理中简化位点选择流程， 只取每条序列所mapping到的第一个位点作为其mapping位点
+		ifan >> temp.mism;
+		ifan >> temp.position;
+		ifan >> temp.site_num;
+		string waste;
+		getline(ifan, waste);
+		list.push_back(temp);
+		count++;
+	}
 }
