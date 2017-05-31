@@ -12,5 +12,5 @@ struct fanse {
 	int mism;
 	string position;
 	int site_num;
-	string pos[];
+	string quality;
 };
