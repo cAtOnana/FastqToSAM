@@ -6,6 +6,7 @@
 using namespace std;
 void show_cigar(fanse a,ostream& os);
 char* argv[4] = { "aaa","Ex8_ZG_hg38.fanse3","Ex8_ZG.fq","GCA_000001405.22_GRCh38.p7_genomic.fa" };
+const int basecount = 80;
 int main(){//int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 	string log = string(argv[1]);
 	log = log.erase(log.length() - 6) + "log";
@@ -52,16 +53,19 @@ int main(){//int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 	string frag;
 	chromosome temp2;
 	int ch_count = 0;
-
+	int line_count = 0;
 	while (iref.get(ch)) {
 		if (ch == '>') {
+			if (line_count > 0)
+				chr_list[ch_count - 1].length = basecount*line_count;
 			iref >> temp2.name;
 			ch_count++;
+			line_count = 0;//renew
 			chr_list.push_back(temp2);
 		}
 		else {
 			getline(iref, frag);
-			chr_list[ch_count].length += frag.length() + 1;
+			line_count++;
 		}
 	}
 	cout << "染色体碱基数统计完成。\n";
@@ -138,7 +142,7 @@ void show_cigar(fanse f,ostream& os)
 		if (a == f.mapping[i])
 			count++;
 		else {
-			if (a == '.') {
+			if (a == '.') {//若不等，则清算
 				os << count << '=';
 				a = f.mapping[i];
 				count = 1;
@@ -160,6 +164,20 @@ void show_cigar(fanse f,ostream& os)
 			}
 			else if (a == ',')
 				break;
+		}
+	}
+	for (int i = 0; i < count; i++) {//最后输出剩余
+		if (a == '.') {
+			os << count << '=';
+		}
+		else if (a == 'x') {
+			os << count << 'X';
+		}
+		else if (a == 'A'&&a == 'T'&&a == 'C'&&a == 'G') {
+			os << count << 'I';
+		}
+		else if (a == '_') {
+			os << count << 'D';
 		}
 	}
 }
