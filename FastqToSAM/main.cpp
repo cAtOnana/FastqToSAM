@@ -166,18 +166,18 @@ void show_cigar(fanse f,ostream& os)
 				break;
 		}
 	}
-	for (int i = 0; i < count; i++) {//最后输出剩余
-		if (a == '.') {
-			os << count << '=';
-		}
-		else if (a == 'x') {
-			os << count << 'X';
-		}
-		else if (a == 'A'&&a == 'T'&&a == 'C'&&a == 'G') {
-			os << count << 'I';
-		}
-		else if (a == '_') {
-			os << count << 'D';
-		}
+	//最后输出剩余
+	if (a == '.') {
+		os << count << '=';
 	}
+	else if (a == 'x') {
+		os << count << 'X';
+	}
+	else if (a == 'A'&&a == 'T'&&a == 'C'&&a == 'G') {
+		os << count << 'I';
+	}
+	else if (a == '_') {
+		os << count << 'D';
+	}
+	
 }
