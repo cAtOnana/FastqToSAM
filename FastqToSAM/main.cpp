@@ -5,8 +5,8 @@
 #include<vector>
 using namespace std;
 void show_cigar(fanse a,ostream& os);
-
-int main(int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
+char* argv[4] = { "aaa","Ex8_ZG_hg38.fanse3","Ex8_ZG.fq","GCA_000001405.22_GRCh38.p7_genomic.fa" };
+int main(){//int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 	string log = string(argv[1]);
 	log = log.erase(log.length() - 6) + "log";
 	ofstream outlog(log);
@@ -14,11 +14,11 @@ int main(int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 		cout << "log文件打开失败，程序退出。";
 		exit(EXIT_FAILURE);
 	}
-	if (argc > 4) {
-		cout << "输入参数过多，程序退出。";
-		outlog << argv[1] << "处理失败，原因：输入参数过多。" << endl;
-		exit(EXIT_FAILURE);
-	}
+	//if (argc > 4) {
+		//cout << "输入参数过多，程序退出。";
+		//outlog << argv[1] << "处理失败，原因：输入参数过多。" << endl;
+	//	exit(EXIT_FAILURE);
+	//}
 	ifstream ifan(argv[1]);
 	if (!ifan.is_open()) {
 		cout << "fanse文件打开失败，请查看输入路径以确认fanse文件在路径中，程序退出。";
@@ -38,7 +38,7 @@ int main(int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 		exit(EXIT_FAILURE);
 	}
 	string sam = string(argv[1]);
-	sam = sam.erase(log.length() - 6) + "sam";
+	sam = sam.erase(log.length() - 3) + "sam";
 	ofstream outsam(sam);
 	if (!outsam.is_open()) {
 		cout << "sam文件创建失败，程序退出。";
@@ -46,11 +46,13 @@ int main(int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 		exit(EXIT_FAILURE);
 	}
 	//统计每个染色体上的碱基数
+
 	vector<chromosome> chr_list;
 	char ch;
 	string frag;
 	chromosome temp2;
 	int ch_count = 0;
+
 	while (iref.get(ch)) {
 		if (ch == '>') {
 			iref >> temp2.name;
@@ -62,10 +64,12 @@ int main(int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 			chr_list[ch_count].length += frag.length() + 1;
 		}
 	}
+	cout << "染色体碱基数统计完成。\n";
 	//输出注释
 	for (int i = 0; i < ch_count; i++) {
-		outsam << "@ SN:" << chr_list[i].name << " LN:" << chr_list[i].length << endl;
+		outsam << "@SQ SN:" << chr_list[i].name << " LN:" << chr_list[i].length << endl;
 	}
+	cout << "注释输出完成。\n";
 	//输入输出循环，每10^6条信息输出一次
 	string waste;
 	string qua;
@@ -102,7 +106,7 @@ int main(int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 			if (count > 1000000)
 				break;
 		}
-
+		cout << "已读入1000000条信息。\n";
 		//输出
 
 
@@ -112,9 +116,17 @@ int main(int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 			show_cigar(fanlist[i],outsam);//<< "CIGAR here!!";
 			outsam << "	" << "*" << "	" << 0 << "	" << 0 << "	" << fanlist[i].seq << "	" << qua;
 		}
+		cout << "已输出1000000条信息。\n";
 		fanlist.clear();
 		fanlist.swap(fanlist);
 	}
+	cout << "Done! " << argv[1] << "已转换完成。"<<endl;
+	outlog << "Done! " << argv[1] << "已转换完成。" << endl;
+	ifan.close();
+	iref.close();
+	ifsq.close();
+	outlog.close();
+	return 0;
 }
 
 void show_cigar(fanse f,ostream& os)
