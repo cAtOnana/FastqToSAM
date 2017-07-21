@@ -5,11 +5,9 @@ using std::string;
 
 struct fanse {
 	int order;
-	string name;
 	string seq;
 	string mapping;
-	char strand;
-	int flag = 0;
+	//char strand;
 	string chr;
 	int mism;
 	string position;

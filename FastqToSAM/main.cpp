@@ -68,10 +68,12 @@ int main(){//int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 			line_count++;
 		}
 	}
+	if (line_count > 0)
+		chr_list[ch_count - 1].length = basecount*line_count;//补上最后一条染色体的长度信息，上面的循环最后只统计了line_count而没有更新最后一条染色体长度
 	cout << "染色体碱基数统计完成。\n";
 	//输出注释
 	for (int i = 0; i < ch_count; i++) {
-		outsam << "@SQ SN:" << chr_list[i].name << " LN:" << chr_list[i].length << endl;
+		outsam << "@SQ"<<"\tSN:" << chr_list[i].name << "\tLN:" << chr_list[i].length << endl;
 	}
 	cout << "注释输出完成。\n";
 	//输入输出循环，每10^6条信息输出一次
@@ -87,12 +89,17 @@ int main(){//int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 		while (ifan >> temp.order) {
 			ifan >> temp.seq;
 			ifan >> temp.mapping;
-			ifan >> temp.strand;
+			//ifan >> temp.strand;
 			ifan >> waste;
 			ifan >> temp.chr;
-			temp.chr.erase(temp.chr.find(','));//本次处理中简化位点选择流程，只取每条序列所mapping到的第一个位点作为其mapping位点
+			string::size_type erase_point = temp.chr.find(',');
+			if(erase_point!=string::npos)
+				temp.chr.erase(erase_point);//本次处理中简化位点选择流程，只取每条序列所mapping到的第一个位点作为其mapping位点
 			ifan >> temp.mism;
 			ifan >> temp.position;
+			erase_point = temp.position.find(',');
+			if (erase_point != string::npos)
+				temp.position.erase(erase_point);
 			ifan >> temp.site_num;
 			end = temp.order;
 			for (int i = begin; i < end; i++) {//begin是未被读取的最前一行的索引（从1算起），end是目标行的索引（从1算起）
@@ -104,21 +111,19 @@ int main(){//int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 			begin = end;
 			temp.quality = qua;
 			fanlist.push_back(temp);
-			string waste;
-			getline(ifan, waste);//删除余下所有信息，转至下一行。
+			//string waste;
+			//getline(ifan, waste);//删除余下所有信息，转至下一行。
 			count++;
-			if (count > 1000000)
+			if (count >= 1000000)
 				break;
 		}
 		cout << "已读入1000000条信息。\n";
 		//输出
-
-
 		for (int i = 0; i < count; i++) {//MAPQ项默认输出100，有更好方案时替换
-			outsam << fanlist[i].order << "	" << 0 << "	" << fanlist[i].chr << "	" << fanlist[i].site_num << "	"
+			outsam<< fanlist[i].order << "	" << 0 << "	" << fanlist[i].chr << "	" << fanlist[i].site_num << "	"
 				<< 100 << "	";
 			show_cigar(fanlist[i],outsam);//<< "CIGAR here!!";
-			outsam << "	" << "*" << "	" << 0 << "	" << 0 << "	" << fanlist[i].seq << "	" << qua;
+			outsam << "	" << "*" << "	" << 0 << "	" << 0 << "	" << fanlist[i].seq << "	" << fanlist[i].quality<<endl;
 		}
 		cout << "已输出1000000条信息。\n";
 		fanlist.clear();
@@ -152,12 +157,12 @@ void show_cigar(fanse f,ostream& os)
 				a = f.mapping[i];
 				count = 1;
 			}
-			else if (a == 'A'&&a == 'T'&&a == 'C'&&a == 'G') {
+			else if (a == 'A'||a == 'T'||a == 'C'||a == 'G') {
 				os << count << 'I';
 				a = f.mapping[i];
 				count = 1;
 			}
-			else if (a == '_') {
+			else if (a == '-') {
 				os << count << 'D';
 				a = f.mapping[i];
 				count = 1;

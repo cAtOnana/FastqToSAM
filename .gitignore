@@ -262,3 +262,4 @@ __pycache__/
 /FastqToSAM/GCA_000001405.22_GRCh38.p7_genomic.fa
 /FastqToSAM/Ex8_ZG_hg38.fanse3
 /FastqToSAM/Ex8_ZG.fq
+/FastqToSAM/Ex8_ZG_hg38.sam
