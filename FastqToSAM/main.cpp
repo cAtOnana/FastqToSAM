@@ -3,8 +3,9 @@
 #include<ctime>
 #include"FanseToSAM.h"
 #include<vector>
+#include<cctype>
 using namespace std;
-void show_cigar(fanse a,ostream& os);
+void show_cigar(fanse a,ostream& os，ostream& log);
 char* argv[4] = { "aaa","Ex8_ZG_hg38.fanse3","Ex8_ZG.fq","GCA_000001405.22_GRCh38.p7_genomic.fa" };
 const int basecount = 80;
 int main(){//int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
@@ -122,7 +123,7 @@ int main(){//int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 		for (int i = 0; i < count; i++) {//MAPQ项默认输出100，有更好方案时替换
 			outsam<< fanlist[i].order << "	" << 0 << "	" << fanlist[i].chr << "	" << fanlist[i].site_num << "	"
 				<< 100 << "	";
-			show_cigar(fanlist[i],outsam);//<< "CIGAR here!!";
+			show_cigar(fanlist[i],outsam,outlog);//<< "CIGAR here!!";
 			outsam << "	" << "*" << "	" << 0 << "	" << 0 << "	" << fanlist[i].seq << "	" << fanlist[i].quality<<endl;
 		}
 		cout << "已输出1000000条信息。\n";
@@ -138,7 +139,7 @@ int main(){//int argc,char*argv[]) {//1.fanse 2.fastq 3.ref
 	return 0;
 }
 
-void show_cigar(fanse f,ostream& os)
+void show_cigar(fanse f,ostream& os,ostream& outlog)
 {
 	int count = 1;
 	char a=f.mapping[0];
@@ -157,7 +158,7 @@ void show_cigar(fanse f,ostream& os)
 				a = f.mapping[i];
 				count = 1;
 			}
-			else if (a == 'A'||a == 'T'||a == 'C'||a == 'G') {
+			else if (isupper(a)) {
 				os << count << 'I';
 				a = f.mapping[i];
 				count = 1;
@@ -169,6 +170,9 @@ void show_cigar(fanse f,ostream& os)
 			}
 			else if (a == ',')
 				break;
+			else {//查错
+				outlog << "转换CiGAR时出现未能识别的字符，字符为：" << a << endl;
+			}
 		}
 	}
 	//最后输出剩余
@@ -178,10 +182,10 @@ void show_cigar(fanse f,ostream& os)
 	else if (a == 'x') {
 		os << count << 'X';
 	}
-	else if (a == 'A'&&a == 'T'&&a == 'C'&&a == 'G') {
+	else if (isupper(a)) {
 		os << count << 'I';
 	}
-	else if (a == '_') {
+	else if (a == '-') {
 		os << count << 'D';
 	}
 	
